@@ -5,33 +5,65 @@
     <title>{% block title %}Smart City{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'bg-base': '#0A0E14',
+                    'bg-surface': '#131922',
+                    'border-dim': '#1F2733',
+                    'accent-cyan': '#4EE1C4',
+                    'accent-amber': '#FFB454',
+                    'text-dim': '#6B7684',
+                },
+                fontFamily: {
+                    display: ['"Space Grotesk"', 'sans-serif'],
+                    mono: ['"JetBrains Mono"', 'monospace'],
+                    sans: ['"Inter"', 'sans-serif'],
+                }
+            }
+        }
+    }
+    </script>
 </head>
-<body class = "bg-gray-100 min-h-screen">
-    <nav class="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
-            <div class="flex gap-6 items-center">
-                <span class="font-bold text-lg">Smart City</span>
-                <a class="hover:text-blue-400" href="/">Home</a>
-                <a class="hover:text-blue-400" href="/monitoring">Monitoring</a>
-                <a class="hover:text-blue-400" href="/response">Response</a>
-            </div>
+<body class="bg-bg-base text-white font-sans">
+    <nav class="bg-bg-surface border-b border-border-dim px-6 py-4 flex items-center justify-between relative">
+        <div class="flex gap-6 items-center">
+            <span class="font-display font-bold text-lg tracking-wide text-white">SMART CITY</span>
+            <a class="font-mono text-text-dim hover:text-accent-cyan transition-colors text-sm font-medium" href="/">Home</a>
+            <a class="font-mono text-text-dim hover:text-accent-cyan transition-colors text-sm font-medium" href="/monitoring">Monitoring</a>
+            <a class="font-mono text-text-dim hover:text-accent-cyan transition-colors text-sm font-medium" href="/response">Response</a>
+        </div>
+        
         <div class="relative">
-            <button id="alert-bell" class="relative">
+            <button id="alert-bell" class="relative p-2 rounded hover:bg-border-dim transition-colors focus:outline-none">
                 🔔
-                <span id="alert-badge" class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full px-1.5 hidden">
+                <span id="alert-badge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 hidden">
                     0
                 </span>
             </button>
-            <div id="alert-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white text-black rounded shadow-lg max-h-80 overflow-y-auto z-50">
-                <div class="p-3 text-sm text-gray-500">No alerts yet</div>
+
+            <!-- Dark Grey Dropdown -->
+            <div id="alert-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-gray-900 border border-gray-800 rounded-lg shadow-2xl max-h-80 overflow-y-auto z-50">
+                <div class="p-3 text-sm text-gray-400 border-b border-gray-800 font-mono font-semibold">Alerts</div>
+                <div id="alert-list" class="p-3 text-sm text-gray-200">No alerts yet</div>
             </div>
         </div>
+
+        <!-- Fixed typo: overflow-hidden -->
+        <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-accent-cyan to-transparent overflow-hidden"></div>
     </nav>
+
     <main class="p-6">
         {% block content %}{% endblock %}
     </main>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-        <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
-        {% block scripts %}{% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
