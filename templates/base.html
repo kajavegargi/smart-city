@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Smart City{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+</head>
+<body class = "bg-gray-100 min-h-screen">
+    <nav class="bg-gray-900 text-white px-6 py-4 flex items-center justify-between">
+            <div class="flex gap-6 items-center">
+                <span class="font-bold text-lg">Smart City</span>
+                <a class="hover:text-blue-400" href="/">Home</a>
+                <a class="hover:text-blue-400" href="/monitoring">Monitoring</a>
+                <a class="hover:text-blue-400" href="/response">Response</a>
+            </div>
+        <div class="relative">
+            <button id="alert-bell" class="relative">
+                🔔
+                <span id="alert-badge" class="absolute -top-2 -right-2 bg-red-600 text-xs rounded-full px-1.5 hidden">
+                    0
+                </span>
+            </button>
+            <div id="alert-dropdown" class="hidden absolute right-0 mt-2 w-72 bg-white text-black rounded shadow-lg max-h-80 overflow-y-auto z-50">
+                <div class="p-3 text-sm text-gray-500">No alerts yet</div>
+            </div>
+        </div>
+    </nav>
+    <main class="p-6">
+        {% block content %}{% endblock %}
+    </main>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+        <script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+        {% block scripts %}{% endblock %}
+</body>
+</html>
