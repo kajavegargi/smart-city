@@ -7,6 +7,9 @@ init_db()
 # from database import get_db, init_db — importing your own two functions from the file you just wrote. Python treats database.py as a module because it's in the same folder.
 app = Flask(__name__)
 
+from detect_routes import detect_bp
+app.register_blueprint(detect_bp)
+
 @app.route("/")
 def home():
     return render_template("home.html")
@@ -45,6 +48,3 @@ def api_alerts():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
-
-from detect_routes import detect_bp
-app.register_blueprint(detect_bp)
