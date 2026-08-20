@@ -45,3 +45,6 @@ def api_alerts():
 
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+
+from detect_routes import detect_bp
+app.register_blueprint(detect_bp)
