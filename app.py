@@ -1,5 +1,8 @@
 from flask import Flask, render_template, jsonify
 from database import get_db, init_db
+from routing import get_route
+from data_simulator.event_sim import simulate_event
+import data_simulator.event_sim as event_sim
 init_db()
 # from flask import Flask, ... — pulling specific names out of the flask package instead of the whole thing, so you can write Flask() instead of flask.Flask().
 # render_template — the function that finds an HTML file inside templates/ and returns it as a response.
@@ -43,5 +46,28 @@ def api_alerts():
     conn.close()
     return jsonify([dict(r) for r in rows])
 
+@app.route("/api/events", methods=["GET"])
+def api_events():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM events ORDER BY timestamp DESC LIMIT 20"
+    ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+
+@app.route("/api/events", methods=["POST"])
+def api_trigger_event():
+    event = simulate_event()
+    return jsonify(event), 201
+
+
+@app.route("/api/route", methods=["GET"])
+def api_route():
+    blocked = {event_sim.CURRENT_BLOCKED_NODE} if event_sim.CURRENT_BLOCKED_NODE else None
+    path = get_route("N1", "N8", blocked_nodes=blocked)
+    return jsonify(path)
+
 if __name__ == "__main__":
     app.run(debug=True, port=5001)
+
+
