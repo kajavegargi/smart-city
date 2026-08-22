@@ -41,6 +41,10 @@ def response():
 
 
 # ---------- Shared API routes (Member 1) ----------
+@app.route("/congestion")
+def congestion():
+    return render_template("congestion.html")
+
 
 @app.route("/api/alerts")
 def api_alerts():
