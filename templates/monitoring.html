@@ -1,795 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>Smart City Monitoring</title>
-
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-    <style>
-
-        * {
-            box-sizing: border-box;
-        }
-
-
-        body {
-
-            margin: 0;
-
-            padding: 30px;
-
-            font-family: Arial, Helvetica, sans-serif;
-
-            background: #f4f6f8;
-
-            color: #111;
-        }
-
-
-        /* ========================= */
-        /* MAIN TITLE */
-        /* ========================= */
-
-        h1 {
-
-            text-align: center;
-
-            font-size: 42px;
-
-            margin: 0 0 40px 0;
-
-            font-weight: 700;
-        }
-
-
-        /* ========================= */
-        /* DASHBOARD GRID */
-        /* ========================= */
-
-        .dashboard {
-
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 30px;
-
-            max-width: 1600px;
-
-            margin: auto;
-        }
-
-
-        /* ========================= */
-        /* SENSOR CARD */
-        /* ========================= */
-
-        .card {
-
-            background: white;
-
-            border-radius: 18px;
-
-            padding: 30px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
-
-            min-height: 470px;
-        }
-
-
-        /* ========================= */
-        /* SENSOR TITLE */
-        /* ========================= */
-
-        .card h2 {
-
-            font-size: 30px;
-
-            margin: 0 0 25px 0;
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
-        }
-
-
-        /* ========================= */
-        /* STATUS */
-        /* ========================= */
-
-        .status {
-
-            font-size: 22px;
-
-            margin-bottom: 5px;
-        }
-
-
-        .current {
-
-            font-size: 21px;
-
-            margin-bottom: 20px;
-        }
-
-
-        .normal {
-
-            color: #111;
-        }
-
-
-        .alert {
-
-            color: #111;
-        }
-
-
-        .status-dot {
-
-            display: inline-block;
-
-            width: 22px;
-
-            height: 22px;
-
-            border-radius: 50%;
-
-            margin-right: 10px;
-
-            vertical-align: middle;
-        }
-
-
-        .green {
-
-            background: #45d98b;
-
-            box-shadow:
-                0 0 8px rgba(69, 217, 139, 0.5);
-        }
-
-
-        .red {
-
-            background: #ed4055;
-
-            box-shadow:
-                0 0 8px rgba(237, 64, 85, 0.5);
-        }
-
-
-        /* ========================= */
-        /* CHART */
-        /* ========================= */
-
-        .chart-container {
-
-            position: relative;
-
-            height: 300px;
-
-            width: 100%;
-        }
-
-
-        /* ========================= */
-        /* BOTTOM SECTION */
-        /* ========================= */
-
-        .bottom-section {
-
-            max-width: 1600px;
-
-            margin: 30px auto 50px auto;
-
-            display: grid;
-
-            grid-template-columns: 1fr 1.5fr;
-
-            gap: 30px;
-        }
-
-
-        /* ========================= */
-        /* SCORE CARD */
-        /* ========================= */
-
-        .score-card {
-
-            background: white;
-
-            border-radius: 18px;
-
-            padding: 30px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
-
-            text-align: center;
-        }
-
-
-        .score-card h2 {
-
-            margin: 0;
-
-            font-size: 27px;
-        }
-
-
-        /* ========================= */
-        /* SCORE CIRCLE */
-        /* ========================= */
-
-        .score-circle {
-
-            width: 190px;
-
-            height: 190px;
-
-            border-radius: 50%;
-
-            margin: 30px auto;
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-            align-items: center;
-
-            border: 14px solid #45d98b;
-
-            background: white;
-        }
-
-
-        #overallScore {
-
-            font-size: 52px;
-
-            font-weight: bold;
-        }
-
-
-        .score-circle small {
-
-            font-size: 17px;
-
-            color: #777;
-        }
-
-
-        #scoreMessage {
-
-            font-size: 18px;
-
-            margin: 10px 0 25px 0;
-        }
-
-
-        /* ========================= */
-        /* SCORE STATS */
-        /* ========================= */
-
-        .score-stats {
-
-            display: flex;
-
-            justify-content: space-evenly;
-
-            margin-top: 20px;
-        }
-
-
-        .score-stat {
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-        }
-
-
-        .score-stat span {
-
-            font-size: 32px;
-
-            font-weight: bold;
-        }
-
-
-        .score-stat small {
-
-            font-size: 15px;
-
-            color: #777;
-
-            margin-top: 5px;
-        }
-
-
-        /* ========================= */
-        /* ALERT HISTORY */
-        /* ========================= */
-
-        .alert-card {
-
-            background: white;
-
-            border-radius: 18px;
-
-            padding: 30px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
-        }
-
-
-        .alert-card h2 {
-
-            margin: 0 0 25px 0;
-
-            font-size: 27px;
-        }
-
-
-        #alertHistory {
-
-            max-height: 330px;
-
-            overflow-y: auto;
-
-            padding-right: 5px;
-        }
-
-
-        /* ========================= */
-        /* INDIVIDUAL ALERT */
-        /* ========================= */
-
-        .alert-item {
-
-            display: flex;
-
-            align-items: center;
-
-            gap: 15px;
-
-            padding: 16px;
-
-            margin-bottom: 12px;
-
-            background: #fff5f5;
-
-            border-radius: 12px;
-
-            border-left: 5px solid #ed4055;
-        }
-
-
-        .alert-icon {
-
-            font-size: 25px;
-        }
-
-
-        .alert-details {
-
-            flex: 1;
-        }
-
-
-        .alert-message {
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            margin-bottom: 6px;
-        }
-
-
-        .alert-time {
-
-            font-size: 13px;
-
-            color: #777;
-        }
-
-
-        .alert-severity {
-
-            background: #ed4055;
-
-            color: white;
-
-            padding: 6px 10px;
-
-            border-radius: 20px;
-
-            font-size: 11px;
-
-            font-weight: bold;
-        }
-
-
-        /* ========================= */
-        /* SCROLLBAR */
-        /* ========================= */
-
-        #alertHistory::-webkit-scrollbar {
-
-            width: 7px;
-        }
-
-
-        #alertHistory::-webkit-scrollbar-thumb {
-
-            background: #ccc;
-
-            border-radius: 10px;
-        }
-
-
-        /* ========================= */
-        /* RESPONSIVE */
-        /* ========================= */
-
-        @media (max-width: 1000px) {
-
-            body {
-
-                padding: 20px;
-            }
-
-
-            .dashboard {
-
-                grid-template-columns: 1fr;
-            }
-
-
-            .bottom-section {
-
-                grid-template-columns: 1fr;
-            }
-
-
-            h1 {
-
-                font-size: 34px;
-            }
-        }
-
-
-        @media (max-width: 600px) {
-
-            body {
-
-                padding: 10px;
-            }
-
-
-            h1 {
-
-                font-size: 28px;
-
-                margin-bottom: 25px;
-            }
-
-
-            .card {
-
-                padding: 20px;
-
-                min-height: 400px;
-            }
-
-
-            .card h2 {
-
-                font-size: 25px;
-            }
-
-
-            .chart-container {
-
-                height: 250px;
-            }
-
-
-            .bottom-section {
-
-                gap: 20px;
-            }
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-    <!-- ========================= -->
-    <!-- TITLE -->
-    <!-- ========================= -->
-
-    <h1>
-        🏙️ Smart City Monitoring
-    </h1>
-
-
-    <!-- ========================= -->
-    <!-- SENSOR DASHBOARD -->
-    <!-- ========================= -->
-
-    <div class="dashboard">
-
-
-        <!-- ===================== -->
-        <!-- ENERGY -->
-        <!-- ===================== -->
-
-        <div class="card">
-
-            <h2>
-                ⚡ Energy
-            </h2>
-
-            <div
-                id="energyStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="energyCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="energyChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================== -->
-        <!-- WATER -->
-        <!-- ===================== -->
-
-        <div class="card">
-
-            <h2>
-                💧 Water
-            </h2>
-
-            <div
-                id="waterStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="waterCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="waterChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================== -->
-        <!-- WASTE -->
-        <!-- ===================== -->
-
-        <div class="card">
-
-            <h2>
-                🗑️ Waste
-            </h2>
-
-            <div
-                id="wasteStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="wasteCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="wasteChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================== -->
-        <!-- ENVIRONMENT -->
-        <!-- ===================== -->
-
-        <div class="card">
-
-            <h2>
-                🌱 Environment
-            </h2>
-
-            <div
-                id="environmentStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="environmentCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="environmentChart"></canvas>
-
-            </div>
-
-        </div>
-
+{% extends "base.html" %}
+{% block title %}Monitoring{% endblock %}
+
+{% block extra_head %}
+<style>
+    * { box-sizing: border-box; }
+
+    .dashboard {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        max-width: 1600px;
+        margin: auto;
+    }
+
+    .card {
+        background: #131922;
+        border: 1px solid #1F2733;
+        border-radius: 18px;
+        padding: 30px;
+        min-height: 470px;
+    }
+
+    .card h2 {
+        font-size: 30px;
+        margin: 0 0 25px 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #E6EDF3;
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .status { font-size: 22px; margin-bottom: 5px; color: #E6EDF3; font-family: "JetBrains Mono", monospace; }
+    .current { font-size: 21px; margin-bottom: 20px; color: #6B7684; font-family: "JetBrains Mono", monospace; }
+    .normal { color: #E6EDF3; }
+    .alert { color: #E6EDF3; }
+
+    .status-dot {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    .green { background: #4EE1C4; box-shadow: 0 0 8px rgba(78, 225, 196, 0.5); }
+    .red { background: #FFB454; box-shadow: 0 0 8px rgba(255, 180, 84, 0.5); }
+
+    .chart-container { position: relative; height: 300px; width: 100%; }
+
+    .bottom-section {
+        max-width: 1600px;
+        margin: 30px auto 50px auto;
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 30px;
+    }
+
+    .score-card, .alert-card {
+        background: #131922;
+        border: 1px solid #1F2733;
+        border-radius: 18px;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .alert-card { text-align: left; }
+
+    .score-card h2, .alert-card h2 {
+        margin: 0 0 25px 0;
+        font-size: 27px;
+        color: #E6EDF3;
+        font-family: "Space Grotesk", sans-serif;
+    }
+
+    .score-circle {
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        margin: 30px auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border: 14px solid #4EE1C4;
+        background: #0A0E14;
+    }
+
+    #overallScore { font-size: 52px; font-weight: bold; color: #E6EDF3; font-family: "JetBrains Mono", monospace; }
+    .score-circle small { font-size: 17px; color: #6B7684; }
+    #scoreMessage { font-size: 18px; margin: 10px 0 25px 0; color: #6B7684; }
+
+    .score-stats { display: flex; justify-content: space-evenly; margin-top: 20px; }
+    .score-stat { display: flex; flex-direction: column; align-items: center; }
+    .score-stat span { font-size: 32px; font-weight: bold; color: #E6EDF3; font-family: "JetBrains Mono", monospace; }
+    .score-stat small { font-size: 15px; color: #6B7684; margin-top: 5px; }
+
+    #alertHistory { max-height: 330px; overflow-y: auto; padding-right: 5px; }
+
+    .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 16px;
+        margin-bottom: 12px;
+        background: #1A1420;
+        border-radius: 12px;
+        border-left: 5px solid #FFB454;
+    }
+
+    .alert-icon { font-size: 25px; }
+    .alert-details { flex: 1; }
+    .alert-message { font-size: 16px; font-weight: bold; margin-bottom: 6px; color: #E6EDF3; }
+    .alert-time { font-size: 13px; color: #6B7684; font-family: "JetBrains Mono", monospace; }
+
+    .alert-severity {
+        background: #FFB454;
+        color: #0A0E14;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: bold;
+    }
+
+    #alertHistory::-webkit-scrollbar { width: 7px; }
+    #alertHistory::-webkit-scrollbar-thumb { background: #1F2733; border-radius: 10px; }
+
+    @media (max-width: 1000px) {
+        .dashboard { grid-template-columns: 1fr; }
+        .bottom-section { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-display font-bold text-center mb-10 text-white">🏙️ Smart City Monitoring</h1>
+
+<div class="dashboard">
+    <div class="card">
+        <h2>⚡ Energy</h2>
+        <div id="energyStatus" class="status">Checking status...</div>
+        <div id="energyCurrent" class="current">Current: --</div>
+        <div class="chart-container"><canvas id="energyChart"></canvas></div>
     </div>
 
-
-    <!-- ========================= -->
-    <!-- SCORE + ALERT HISTORY -->
-    <!-- ========================= -->
-
-    <div class="bottom-section">
-
-
-        <!-- ===================== -->
-        <!-- OVERALL SCORE -->
-        <!-- ===================== -->
-
-        <div class="score-card">
-
-            <h2>
-                ⭐ Overall Smart City Score
-            </h2>
-
-
-            <div class="score-circle">
-
-                <span id="overallScore">
-                    --
-                </span>
-
-                <small>
-                    / 100
-                </small>
-
-            </div>
-
-
-            <p id="scoreMessage">
-                Calculating city health...
-            </p>
-
-
-            <div class="score-stats">
-
-
-                <div class="score-stat">
-
-                    <span id="normalCount">
-                        0
-                    </span>
-
-                    <small>
-                        Normal
-                    </small>
-
-                </div>
-
-
-                <div class="score-stat">
-
-                    <span id="alertCount">
-                        0
-                    </span>
-
-                    <small>
-                        Alerts
-                    </small>
-
-                </div>
-
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================== -->
-        <!-- ALERT HISTORY -->
-        <!-- ===================== -->
-
-        <div class="alert-card">
-
-            <h2>
-                🚨 Alert History
-            </h2>
-
-
-            <div id="alertHistory">
-
-                <p>
-                    Loading alerts...
-                </p>
-
-            </div>
-
-        </div>
-
+    <div class="card">
+        <h2>💧 Water</h2>
+        <div id="waterStatus" class="status">Checking status...</div>
+        <div id="waterCurrent" class="current">Current: --</div>
+        <div class="chart-container"><canvas id="waterChart"></canvas></div>
     </div>
 
+    <div class="card">
+        <h2>🗑️ Waste</h2>
+        <div id="wasteStatus" class="status">Checking status...</div>
+        <div id="wasteCurrent" class="current">Current: --</div>
+        <div class="chart-container"><canvas id="wasteChart"></canvas></div>
+    </div>
 
-    <!-- ========================= -->
-    <!-- JAVASCRIPT -->
-    <!-- ========================= -->
+    <div class="card">
+        <h2>🌱 Environment</h2>
+        <div id="environmentStatus" class="status">Checking status...</div>
+        <div id="environmentCurrent" class="current">Current: --</div>
+        <div class="chart-container"><canvas id="environmentChart"></canvas></div>
+    </div>
+</div>
 
-    <script src="{{ url_for('static', filename='js/monitoring.js') }}">
-    </script>
+<div class="bottom-section">
+    <div class="score-card">
+        <h2>⭐ Overall Smart City Score</h2>
+        <div class="score-circle">
+            <span id="overallScore">--</span>
+            <small>/ 100</small>
+        </div>
+        <p id="scoreMessage">Calculating city health...</p>
+        <div class="score-stats">
+            <div class="score-stat">
+                <span id="normalCount">0</span>
+                <small>Normal</small>
+            </div>
+            <div class="score-stat">
+                <span id="alertCount">0</span>
+                <small>Alerts</small>
+            </div>
+        </div>
+    </div>
 
+    <div class="alert-card">
+        <h2>🚨 Alert History</h2>
+        <div id="alertHistory"><p>Loading alerts...</p></div>
+    </div>
+</div>
+{% endblock %}
 
-</body>
-
-</html>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/monitoring.js') }}"></script>
+{% endblock %}

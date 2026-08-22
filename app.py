@@ -21,41 +21,37 @@ def home():
 def monitoring():
     return render_template("monitoring.html")
 
+@app.route("/response")
+def response():
+    return render_template("response.html")
 
+@app.route("/api/summary")
+def api_summary():
+    conn = get_db()
+    active_alerts = conn.execute("SELECT COUNT(*) as c FROM alerts").fetchone()["c"]
+    sensor_types_online = conn.execute("SELECT COUNT(DISTINCT type) as c FROM sensor_readings").fetchone()["c"]
+    active_events = conn.execute("SELECT COUNT(*) as c FROM events WHERE status = 'active'").fetchone()["c"]
+    conn.close()
+
+    return jsonify({
+        "active_alerts": active_alerts,
+        "sensor_types_online": sensor_types_online,
+        "active_events": active_events
+    })
 # -------------------------------
 # GET SENSOR DATA
 # -------------------------------
 
 @app.route("/api/sensors")
 def get_sensors():
-
-    conn = sqlite3.connect("smart_city.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
-    cursor.execute("""
+    conn = get_db()
+    rows = conn.execute("""
         SELECT id, type, value, unit, status, timestamp
-        FROM sensors
+        FROM sensor_readings
         ORDER BY timestamp ASC
-    """)
-
-    rows = cursor.fetchall()
+    """).fetchall()
     conn.close()
-
-    sensors = []
-
-    for row in rows:
-
-        sensors.append({
-            "id": row["id"],
-            "type": row["type"],
-            "value": row["value"],
-            "unit": row["unit"],
-            "status": row["status"],
-            "timestamp": row["timestamp"]
-        })
-
-    return jsonify(sensors)
+    return jsonify([dict(r) for r in rows])
 
 
 # -------------------------------
@@ -64,33 +60,15 @@ def get_sensors():
 
 @app.route("/api/alerts")
 def get_alerts():
-
-    conn = sqlite3.connect("smart_city.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
-    cursor.execute("""
+    conn = get_db()
+    rows = conn.execute("""
         SELECT source_module, message, severity, timestamp
         FROM alerts
         ORDER BY id DESC
         LIMIT 10
-    """)
-
-    rows = cursor.fetchall()
+    """).fetchall()
     conn.close()
-
-    alerts = []
-
-    for row in rows:
-
-        alerts.append({
-            "source_module": row["source_module"],
-            "message": row["message"],
-            "severity": row["severity"],
-            "timestamp": row["timestamp"]
-        })
-
-    return jsonify(alerts)
+    return jsonify([dict(r) for r in rows])
 
 
 # -------------------------------
@@ -99,44 +77,27 @@ def get_alerts():
 
 @app.route("/api/score")
 def get_score():
-
-    conn = sqlite3.connect("smart_city.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-
-    # Get latest reading of every sensor type
-    cursor.execute("""
+    conn = get_db()
+    rows = conn.execute("""
         SELECT type, value, unit, status
-        FROM sensors
+        FROM sensor_readings
         WHERE id IN (
             SELECT MAX(id)
-            FROM sensors
+            FROM sensor_readings
             GROUP BY type
         )
-    """)
-
-    rows = cursor.fetchall()
+    """).fetchall()
     conn.close()
 
     total = len(rows)
-
     if total == 0:
-        return jsonify({
-            "score": 0,
-            "normal": 0,
-            "alerts": 0
-        })
+        return jsonify({"score": 0, "normal": 0, "alerts": 0})
 
     normal = sum(1 for row in rows if row["status"] == "normal")
     alerts = total - normal
-
     score = round((normal / total) * 100)
 
-    return jsonify({
-        "score": score,
-        "normal": normal,
-        "alerts": alerts
-    })
+    return jsonify({"score": score, "normal": normal, "alerts": alerts})
 
 
 # -------------------------------
