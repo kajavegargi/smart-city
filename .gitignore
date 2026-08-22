@@ -1,4 +1,5 @@
 venv/
 smart_city.db
 __pycache__/
-.DS_Store
+.DS_Storesmart_city.db
+venv/

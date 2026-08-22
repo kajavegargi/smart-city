@@ -2,24 +2,28 @@
 
 let responseMap;
 let markers = [];
+let resourceMarkers = [];
 
 document.addEventListener("DOMContentLoaded", () => {
-  responseMap = createMap("response-map", [28.614, 77.211], 14);
+  responseMap = createMap("response-map", [12.9716, 77.5946], 13);
 
   document.getElementById("simulate-event-btn").addEventListener("click", simulateEvent);
 
   fetchEvents();
+  fetchResources();
   fetchRoute();
 
   setInterval(fetchEvents, 5000);
+  setInterval(fetchResources, 5000);
   setInterval(fetchRoute, 5000);
 });
 
 async function simulateEvent() {
   try {
-    const res = await fetch("/api/events", { method: "POST" });
+    const res = await fetch("/api/simulate-event", { method: "POST" });
     if (!res.ok) throw new Error("Failed to simulate event");
     await fetchEvents();
+    await fetchResources();
     await fetchRoute();
   } catch (err) {
     console.error(err);
@@ -71,13 +75,38 @@ function renderEventMarkers(events) {
     });
 }
 
+async function fetchResources() {
+  try {
+    const res = await fetch("/api/resources");
+    const resources = await res.json();
+    renderResourceMarkers(resources);
+  } catch (err) {
+    console.error("Error fetching resources:", err);
+  }
+}
+
+function renderResourceMarkers(resources) {
+  resourceMarkers.forEach((m) => responseMap.removeLayer(m));
+  resourceMarkers = [];
+
+  resources.forEach((r) => {
+    const status = r.status === "dispatched" ? "🚨 dispatched" : "✅ available";
+    const marker = addMarker(
+      responseMap,
+      r.location_lat,
+      r.location_lng,
+      `<b>${r.name}</b><br>${status}`
+    );
+    resourceMarkers.push(marker);
+  });
+}
+
 async function fetchRoute() {
   try {
     const res = await fetch("/api/route");
-    const points = await res.json();
-    if (!points.length) return;
-    const coordsArray = points.map((p) => [p.lat, p.lng]);
-    drawRoute(responseMap, coordsArray);
+    const routes = await res.json();
+    if (!routes.length) return;
+    drawRoutes(responseMap, routes);
   } catch (err) {
     console.error("Error fetching route:", err);
   }

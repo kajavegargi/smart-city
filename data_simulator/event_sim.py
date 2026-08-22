@@ -1,121 +1,90 @@
 """
 data_simulator/event_sim.py — Member 3
 
-Two ways to use this:
-1. Call simulate_event() from a Flask route when the user clicks "Simulate Event" in the UI.
-2. Run this file directly to drop one fake event on a loop (optional, for background demo noise).
+Two ways to fire an event:
+  1. Run this file directly — fires one random disaster event and exits.
+     Good for a "Simulate Event" button calling this via subprocess, or
+     for quick testing.
+  2. Import simulate_disaster_event() from app.py / a route and call it
+     on a button click from response.html — this is the recommended
+     approach for a live demo (button-triggered, not a background loop).
 
-Also exposes CURRENT_BLOCKED_NODE so the /api/route endpoint can reroute around
-whatever node the latest active event is sitting on.
+Also exposes simulate_disaster_event() as the SINGLE function Member 4's
+detect_routes.py should call once this file exists, instead of Member 4
+inserting into events/alerts directly — see the note in detect_routes.py.
+
+Every event insert also triggers a resource dispatch via routing.py, so
+firing an event immediately shows a rescue team/ambulance/shelter being
+assigned on the response map.
 """
 
 import sqlite3
 import random
-import time
 from datetime import datetime
+from routing import CITY_NODES, dispatch_nearest_resource
 
-DB_PATH = "smart_city.db"  # adjust if your database.py uses a different path/const
+DB_PATH = "smart_city.db"
 
-EVENT_TYPES = ["traffic", "security", "health"]
+DISASTER_TYPES = ["flood", "landslide", "earthquake", "heatwave"]
 
-TRAFFIC_DESCRIPTIONS = [
-    "Traffic congestion at Node {node}",
-    "Accident reported near Node {node}",
-    "Road closure at Node {node}",
-]
-SECURITY_DESCRIPTIONS = [
-    "Suspicious activity reported near Node {node}",
-    "Security alert triggered at Node {node}",
-]
-HEALTH_DESCRIPTIONS = [
-    "Medical emergency reported near Node {node}",
-    "E-health dispatch requested at Node {node}",
-]
-
-# Node ids should match routing.py's NODES keys
-NODE_IDS = ["N1", "N2", "N3", "N4", "N5", "N6", "N7", "N8"]
-
-# Module-level state: which node (if any) is currently "blocked" by an active event.
-# app.py's /api/route reads this to reroute around it.
-CURRENT_BLOCKED_NODE = None
+DESCRIPTIONS = {
+    "flood": "Rising water levels reported, possible evacuation needed",
+    "landslide": "Slope failure reported, road access may be blocked",
+    "earthquake": "Seismic activity reported, structural damage possible",
+    "heatwave": "Extreme heat reported, vulnerable residents at risk",
+    "rescue": "Possible stranded people detected, rescue may be needed",
+}
 
 
-def _get_conn():
+def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def _severity_for(event_type):
-    return {"traffic": "medium", "security": "high", "health": "high"}.get(event_type, "low")
-
-
-def simulate_event(event_type=None, node_id=None):
+def simulate_disaster_event(disaster_type=None, node_id=None, description_override=None, severity_override=None):
     """
-    Inserts one fake event row + a matching alert row.
-    Call this from a Flask route (button click) or Member 4's YOLO trigger.
-    Returns the event dict that was inserted.
+    Inserts one disaster event at a mock city node, inserts a matching
+    alert, and dispatches the nearest available resource to it.
+
+    disaster_type: one of DISASTER_TYPES (or 'rescue'), random if not given
+    node_id: which mock city node it happens at, random if not given
+    description_override / severity_override: used by Member 4's
+        detection route to pass in detection-specific details instead
+        of the generic canned description/severity.
+
+    Returns the inserted event's id.
     """
-    global CURRENT_BLOCKED_NODE
+    disaster_type = disaster_type or random.choice(DISASTER_TYPES)
+    node = CITY_NODES[node_id] if node_id else random.choice(list(CITY_NODES.values()))
+    description = description_override or DESCRIPTIONS[disaster_type]
+    severity = severity_override or "high"
 
-    from routing import node_coords  # local import avoids circulars at module load
+    conn = get_db()
+    now = datetime.now().isoformat(timespec="seconds")
 
-    event_type = event_type or random.choice(EVENT_TYPES)
-    node_id = node_id or random.choice(NODE_IDS)
-    lat, lng = node_coords(node_id)
-
-    if event_type == "traffic":
-        description = random.choice(TRAFFIC_DESCRIPTIONS).format(node=node_id)
-        CURRENT_BLOCKED_NODE = node_id  # only traffic events block routing
-    elif event_type == "security":
-        description = random.choice(SECURITY_DESCRIPTIONS).format(node=node_id)
-    else:
-        description = random.choice(HEALTH_DESCRIPTIONS).format(node=node_id)
-
-    timestamp = datetime.now().isoformat()
-
-    conn = _get_conn()
-    cur = conn.cursor()
-    cur.execute(
-        """INSERT INTO events (type, location_lat, location_lng, description, status, timestamp)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (event_type, lat, lng, description, "active", timestamp),
+    cur = conn.execute(
+        "INSERT INTO events (type, location_lat, location_lng, description, status, timestamp) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (disaster_type, node["lat"], node["lng"], description, "active", now)
     )
     event_id = cur.lastrowid
 
-    cur.execute(
-        """INSERT INTO alerts (source_module, message, severity, timestamp)
-           VALUES (?, ?, ?, ?)""",
-        ("response", description, _severity_for(event_type), timestamp),
+    conn.execute(
+        "INSERT INTO alerts (source_module, message, severity, timestamp) VALUES (?, ?, ?, ?)",
+        ("response", f"{disaster_type.capitalize()} event at {node['name']} — {description}", severity, now)
     )
+
     conn.commit()
     conn.close()
 
-    return {
-        "id": event_id,
-        "type": event_type,
-        "location_lat": lat,
-        "location_lng": lng,
-        "description": description,
-        "status": "active",
-        "timestamp": timestamp,
-        "blocked_node": node_id,
-    }
+    # Immediately try to dispatch a resource — this is the "optimal
+    # allocation of emergency resources" part of the problem statement.
+    dispatch_nearest_resource(event_id, node)
 
-
-def resolve_event(event_id):
-    """Mark an event resolved and clear the routing block if it was the blocking one."""
-    global CURRENT_BLOCKED_NODE
-    conn = _get_conn()
-    conn.execute("UPDATE events SET status = 'resolved' WHERE id = ?", (event_id,))
-    conn.commit()
-    conn.close()
-    CURRENT_BLOCKED_NODE = None
+    return event_id
 
 
 if __name__ == "__main__":
-    # Optional: run standalone to generate background event noise every ~20-40s
-    while True:
-        e = simulate_event()
-        print(f"[event_sim] inserted: {e['description']}")
-        time.sleep(random.randint(20, 40))
+    event_id = simulate_disaster_event()
+    print(f"Simulated disaster event #{event_id}")

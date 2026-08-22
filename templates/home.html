@@ -2,19 +2,23 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-   <h1 class="text-2xl font-bold mb-6">City Overview</h1>
-   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-black">Active Alerts</div>
-            <div id="summary-alerts" class="text-3xl text-black font-bold">–</div>
+   <h1 class="text-2xl font-bold mb-6 text-white">City Overview</h1>
+   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-bg-surface border border-border-dim rounded-lg shadow p-6">
+            <div class="text-sm text-text-dim">Active Alerts</div>
+            <div id="summary-alerts" class="text-3xl text-white font-bold font-mono">–</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-black">Sensor Types Online</div>
-            <div id="summary-sensors" class="text-3xl text-black font-bold">–</div>
+        <div class="bg-bg-surface border border-border-dim rounded-lg shadow p-6">
+            <div class="text-sm text-text-dim">Active Events</div>
+            <div id="summary-events" class="text-3xl text-white font-bold font-mono">–</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm text-black">Active Events</div>
-            <div id="summary-events" class="text-3xl text-black font-bold">–</div>
+        <div class="bg-bg-surface border border-border-dim rounded-lg shadow p-6">
+            <div class="text-sm text-text-dim">Resources Available</div>
+            <div id="summary-resources-available" class="text-3xl text-accent-cyan font-bold font-mono">–</div>
+        </div>
+        <div class="bg-bg-surface border border-border-dim rounded-lg shadow p-6">
+            <div class="text-sm text-text-dim">Resources Dispatched</div>
+            <div id="summary-resources-dispatched" class="text-3xl text-accent-amber font-bold font-mono">–</div>
         </div>
    </div>
 {% endblock %}
@@ -25,8 +29,9 @@
         const res = await fetch("/api/summary");
         const data = await res.json();
         document.getElementById("summary-alerts").textContent = data.active_alerts;
-        document.getElementById("summary-sensors").textContent = data.sensor_types_online;
         document.getElementById("summary-events").textContent = data.active_events;
+        document.getElementById("summary-resources-available").textContent = data.resources_available;
+        document.getElementById("summary-resources-dispatched").textContent = data.resources_dispatched;
     }
     loadSummary();
     setInterval(loadSummary, 5000);
