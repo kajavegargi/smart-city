@@ -3,3 +3,5 @@ smart_city.db
 __pycache__/
 .DS_Storesmart_city.db
 venv/
+smart_city.db
+venv/

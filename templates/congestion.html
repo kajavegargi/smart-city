@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Congestion Detection{% endblock %}
+{% block content %}
+<div class="flex items-center justify-between mb-4">
+  <h1 class="text-2xl font-display font-bold text-white">Traffic Congestion Detection</h1>
+  <div id="detect-status" class="text-sm text-text-dim">Idle</div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+  <div class="lg:col-span-2 bg-bg-surface border border-border-dim rounded-xl shadow p-4">
+    <video id="feed-video" autoplay loop muted playsinline class="w-full rounded-lg"></video>
+    <canvas id="feed-canvas" class="hidden"></canvas>
+  </div>
+
+  <div class="bg-bg-surface border border-border-dim rounded-xl shadow p-4">
+    <h2 class="text-lg font-semibold mb-3 text-white">Live Detections</h2>
+    <div id="detection-counts" class="space-y-1 text-sm text-text-dim mb-4">No data yet.</div>
+    <h2 class="text-lg font-semibold mb-3 text-white">Congestion Alerts</h2>
+    <ul id="congestion-log" class="space-y-2 text-sm text-text-dim">
+      <li>No congestion detected yet.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/congestion.js') }}"></script>
+{% endblock %}
