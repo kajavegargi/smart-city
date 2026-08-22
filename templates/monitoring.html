@@ -1,18 +1,24 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Smart City Monitoring</title>
+    <title>
+        Smart City Disaster Monitoring
+    </title>
 
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
 
 
     <style>
@@ -28,7 +34,10 @@
 
             padding: 30px;
 
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
             background: #f4f6f8;
 
@@ -36,289 +45,212 @@
         }
 
 
-        /* ========================= */
-        /* MAIN TITLE */
-        /* ========================= */
-
         h1 {
 
             text-align: center;
 
-            font-size: 42px;
+            font-size: 40px;
 
-            margin: 0 0 40px 0;
-
-            font-weight: 700;
+            margin-bottom: 10px;
         }
 
 
-        /* ========================= */
-        /* DASHBOARD GRID */
-        /* ========================= */
+        .subtitle {
 
-        .dashboard {
+            text-align: center;
 
-            display: grid;
+            color: #666;
 
-            grid-template-columns: 1fr 1fr;
+            font-size: 18px;
 
-            gap: 30px;
+            margin-bottom: 30px;
+        }
 
-            max-width: 1600px;
+
+        .container {
+
+            max-width: 1200px;
 
             margin: auto;
         }
 
 
-        /* ========================= */
-        /* SENSOR CARD */
-        /* ========================= */
+        /* ====================================== */
+        /* CURRENT DISASTER */
+        /* ====================================== */
 
-        .card {
+        .priority-card {
 
             background: white;
 
-            border-radius: 18px;
+            border-radius: 20px;
 
-            padding: 30px;
+            padding: 35px;
+
+            text-align: center;
 
             box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
+                0 5px 25px
+                rgba(0,0,0,0.1);
 
-            min-height: 470px;
+            margin-bottom: 25px;
         }
 
 
-        /* ========================= */
-        /* SENSOR TITLE */
-        /* ========================= */
+        .priority-label {
 
-        .card h2 {
+            color: #777;
 
-            font-size: 30px;
+            font-size: 16px;
 
-            margin: 0 0 25px 0;
+            text-transform: uppercase;
 
-            display: flex;
-
-            align-items: center;
-
-            gap: 12px;
+            letter-spacing: 2px;
         }
 
 
-        /* ========================= */
-        /* STATUS */
-        /* ========================= */
+        #disasterIcon {
 
-        .status {
+            font-size: 65px;
 
-            font-size: 22px;
-
-            margin-bottom: 5px;
+            margin: 10px;
         }
 
 
-        .current {
+        #disasterName {
 
-            font-size: 21px;
+            font-size: 42px;
 
-            margin-bottom: 20px;
+            margin: 5px;
         }
 
 
-        .normal {
-
-            color: #111;
-        }
-
-
-        .alert {
-
-            color: #111;
-        }
-
-
-        .status-dot {
+        #riskLevel {
 
             display: inline-block;
 
-            width: 22px;
+            padding: 10px 25px;
 
-            height: 22px;
+            border-radius: 30px;
 
-            border-radius: 50%;
+            font-weight: bold;
 
-            margin-right: 10px;
+            font-size: 20px;
 
-            vertical-align: middle;
+            margin: 10px;
         }
 
 
-        .green {
+        #riskScore {
 
-            background: #45d98b;
+            font-size: 24px;
 
-            box-shadow:
-                0 0 8px rgba(69, 217, 139, 0.5);
+            font-weight: bold;
+
+            margin: 15px;
         }
 
 
-        .red {
+        #recommendation {
 
-            background: #ed4055;
+            background: #fff7e6;
 
-            box-shadow:
-                0 0 8px rgba(237, 64, 85, 0.5);
+            padding: 18px;
+
+            border-radius: 12px;
+
+            margin-top: 20px;
+
+            font-size: 17px;
         }
 
 
-        /* ========================= */
-        /* CHART */
-        /* ========================= */
+        /* ====================================== */
+        /* RISK LEVEL COLORS */
+        /* ====================================== */
 
-        .chart-container {
+        .low {
 
-            position: relative;
+            background: #d9f7e8;
 
-            height: 300px;
-
-            width: 100%;
+            color: #16844c;
         }
 
 
-        /* ========================= */
-        /* BOTTOM SECTION */
-        /* ========================= */
+        .moderate {
 
-        .bottom-section {
+            background: #fff2c7;
 
-            max-width: 1600px;
+            color: #a87900;
+        }
 
-            margin: 30px auto 50px auto;
+
+        .high {
+
+            background: #ffe0c2;
+
+            color: #c55c00;
+        }
+
+
+        .critical {
+
+            background: #ffd6d6;
+
+            color: #c51f32;
+        }
+
+
+        /* ====================================== */
+        /* RESOURCE CARDS */
+        /* ====================================== */
+
+        .resource-grid {
 
             display: grid;
 
-            grid-template-columns: 1fr 1.5fr;
+            grid-template-columns:
+                repeat(4, 1fr);
 
-            gap: 30px;
+            gap: 18px;
+
+            margin-bottom: 25px;
         }
 
 
-        /* ========================= */
-        /* SCORE CARD */
-        /* ========================= */
-
-        .score-card {
+        .resource {
 
             background: white;
 
-            border-radius: 18px;
-
-            padding: 30px;
-
-            box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 25px;
 
             text-align: center;
+
+            border-radius: 15px;
+
+            box-shadow:
+                0 4px 15px
+                rgba(0,0,0,0.07);
         }
 
 
-        .score-card h2 {
+        .resource-icon {
 
-            margin: 0;
-
-            font-size: 27px;
+            font-size: 35px;
         }
 
 
-        /* ========================= */
-        /* SCORE CIRCLE */
-        /* ========================= */
-
-        .score-circle {
-
-            width: 190px;
-
-            height: 190px;
-
-            border-radius: 50%;
-
-            margin: 30px auto;
-
-            display: flex;
-
-            flex-direction: column;
-
-            justify-content: center;
-
-            align-items: center;
-
-            border: 14px solid #45d98b;
-
-            background: white;
-        }
-
-
-        #overallScore {
-
-            font-size: 52px;
-
-            font-weight: bold;
-        }
-
-
-        .score-circle small {
-
-            font-size: 17px;
-
-            color: #777;
-        }
-
-
-        #scoreMessage {
-
-            font-size: 18px;
-
-            margin: 10px 0 25px 0;
-        }
-
-
-        /* ========================= */
-        /* SCORE STATS */
-        /* ========================= */
-
-        .score-stats {
-
-            display: flex;
-
-            justify-content: space-evenly;
-
-            margin-top: 20px;
-        }
-
-
-        .score-stat {
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-        }
-
-
-        .score-stat span {
+        .resource-value {
 
             font-size: 32px;
 
             font-weight: bold;
+
+            margin-top: 8px;
         }
 
 
-        .score-stat small {
-
-            font-size: 15px;
+        .resource-name {
 
             color: #777;
 
@@ -326,44 +258,86 @@
         }
 
 
-        /* ========================= */
-        /* ALERT HISTORY */
-        /* ========================= */
+        /* ====================================== */
+        /* RISK OVERVIEW */
+        /* ====================================== */
 
-        .alert-card {
+        .panel {
 
             background: white;
 
+            padding: 25px;
+
             border-radius: 18px;
 
-            padding: 30px;
+            margin-bottom: 25px;
 
             box-shadow:
-                0 5px 20px rgba(0, 0, 0, 0.08);
+                0 4px 15px
+                rgba(0,0,0,0.07);
         }
 
 
-        .alert-card h2 {
+        .risk-overview {
 
-            margin: 0 0 25px 0;
+            display: grid;
 
-            font-size: 27px;
+            grid-template-columns:
+                repeat(4, 1fr);
+
+            gap: 15px;
         }
 
 
-        #alertHistory {
+        .risk-item {
 
-            max-height: 330px;
+            padding: 18px;
 
-            overflow-y: auto;
+            background: #f5f7f9;
 
-            padding-right: 5px;
+            border-radius: 12px;
+
+            text-align: center;
         }
 
 
-        /* ========================= */
-        /* INDIVIDUAL ALERT */
-        /* ========================= */
+        .risk-item-name {
+
+            font-weight: bold;
+
+            margin-bottom: 10px;
+        }
+
+
+        .risk-item-score {
+
+            font-size: 25px;
+
+            font-weight: bold;
+        }
+
+
+        /* ====================================== */
+        /* SCORE */
+        /* ====================================== */
+
+        .score-section {
+
+            text-align: center;
+        }
+
+
+        #overallScore {
+
+            font-size: 55px;
+
+            font-weight: bold;
+        }
+
+
+        /* ====================================== */
+        /* ALERTS */
+        /* ====================================== */
 
         .alert-item {
 
@@ -371,23 +345,18 @@
 
             align-items: center;
 
-            gap: 15px;
+            gap: 12px;
 
-            padding: 16px;
-
-            margin-bottom: 12px;
+            padding: 14px;
 
             background: #fff5f5;
 
-            border-radius: 12px;
+            border-left:
+                5px solid #e04455;
 
-            border-left: 5px solid #ed4055;
-        }
+            border-radius: 10px;
 
-
-        .alert-icon {
-
-            font-size: 25px;
+            margin-bottom: 10px;
         }
 
 
@@ -399,127 +368,47 @@
 
         .alert-message {
 
-            font-size: 16px;
-
             font-weight: bold;
-
-            margin-bottom: 6px;
         }
 
 
         .alert-time {
 
-            font-size: 13px;
-
             color: #777;
+
+            font-size: 12px;
+
+            margin-top: 5px;
         }
 
 
-        .alert-severity {
+        /* ====================================== */
 
-            background: #ed4055;
+        @media(max-width: 800px) {
 
-            color: white;
+            .resource-grid,
+            .risk-overview {
 
-            padding: 6px 10px;
-
-            border-radius: 20px;
-
-            font-size: 11px;
-
-            font-weight: bold;
-        }
-
-
-        /* ========================= */
-        /* SCROLLBAR */
-        /* ========================= */
-
-        #alertHistory::-webkit-scrollbar {
-
-            width: 7px;
-        }
-
-
-        #alertHistory::-webkit-scrollbar-thumb {
-
-            background: #ccc;
-
-            border-radius: 10px;
-        }
-
-
-        /* ========================= */
-        /* RESPONSIVE */
-        /* ========================= */
-
-        @media (max-width: 1000px) {
-
-            body {
-
-                padding: 20px;
+                grid-template-columns:
+                    repeat(2, 1fr);
             }
 
+        }
 
-            .dashboard {
+
+        @media(max-width: 500px) {
+
+            .resource-grid,
+            .risk-overview {
 
                 grid-template-columns: 1fr;
             }
 
+            #disasterName {
 
-            .bottom-section {
-
-                grid-template-columns: 1fr;
+                font-size: 32px;
             }
 
-
-            h1 {
-
-                font-size: 34px;
-            }
-        }
-
-
-        @media (max-width: 600px) {
-
-            body {
-
-                padding: 10px;
-            }
-
-
-            h1 {
-
-                font-size: 28px;
-
-                margin-bottom: 25px;
-            }
-
-
-            .card {
-
-                padding: 20px;
-
-                min-height: 400px;
-            }
-
-
-            .card h2 {
-
-                font-size: 25px;
-            }
-
-
-            .chart-container {
-
-                height: 250px;
-            }
-
-
-            .bottom-section {
-
-                gap: 20px;
-            }
         }
 
     </style>
@@ -530,264 +419,263 @@
 <body>
 
 
-    <!-- ========================= -->
-    <!-- TITLE -->
-    <!-- ========================= -->
-
-    <h1>
-        🏙️ Smart City Monitoring
-    </h1>
+    <div class="container">
 
 
-    <!-- ========================= -->
-    <!-- SENSOR DASHBOARD -->
-    <!-- ========================= -->
-
-    <div class="dashboard">
+        <h1>
+            🏙️ Smart City Disaster Monitoring
+        </h1>
 
 
-        <!-- ===================== -->
-        <!-- ENERGY -->
-        <!-- ===================== -->
+        <div class="subtitle">
 
-        <div class="card">
+            Continuous disaster-risk monitoring
+            and emergency decision support
 
-            <h2>
-                ⚡ Energy
+        </div>
+
+
+        <!-- ===================================== -->
+        <!-- CURRENT PRIORITY -->
+        <!-- ===================================== -->
+
+        <div class="priority-card">
+
+
+            <div class="priority-label">
+
+                🚨 Current Priority Disaster
+
+            </div>
+
+
+            <div id="disasterIcon">
+                🔍
+            </div>
+
+
+            <h2 id="disasterName">
+                Checking...
             </h2>
 
-            <div
-                id="energyStatus"
-                class="status">
 
-                Checking status...
+            <div id="riskLevel">
+                ANALYSING
+            </div>
+
+
+            <div id="riskScore">
+                Risk Score: --
+            </div>
+
+
+            <div id="recommendation">
+
+                Analysing sensor data and
+                determining the highest-priority
+                disaster...
 
             </div>
 
-            <div
-                id="energyCurrent"
-                class="current">
 
-                Current: --
+        </div>
 
-            </div>
 
-            <div class="chart-container">
+        <!-- ===================================== -->
+        <!-- RESOURCE ALLOCATION -->
+        <!-- ===================================== -->
 
-                <canvas id="energyChart"></canvas>
+        <div class="panel">
+
+            <h2>
+                🚑 Recommended Emergency Resources
+            </h2>
+
+
+            <div class="resource-grid">
+
+
+                <div class="resource">
+
+                    <div class="resource-icon">
+                        🚑
+                    </div>
+
+                    <div
+                        id="ambulances"
+                        class="resource-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="resource-name">
+                        Ambulances
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-icon">
+                        🚒
+                    </div>
+
+                    <div
+                        id="rescueTeams"
+                        class="resource-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="resource-name">
+                        Rescue Teams
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-icon">
+                        🏠
+                    </div>
+
+                    <div
+                        id="shelters"
+                        class="resource-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="resource-name">
+                        Shelters
+                    </div>
+
+                </div>
+
+
+                <div class="resource">
+
+                    <div class="resource-icon">
+                        📦
+                    </div>
+
+                    <div
+                        id="reliefSupplies"
+                        class="resource-value"
+                    >
+                        --
+                    </div>
+
+                    <div class="resource-name">
+                        Relief Supplies
+                    </div>
+
+                </div>
+
 
             </div>
 
         </div>
 
 
-        <!-- ===================== -->
-        <!-- WATER -->
-        <!-- ===================== -->
+        <!-- ===================================== -->
+        <!-- ALL RISK OVERVIEW -->
+        <!-- ===================================== -->
 
-        <div class="card">
+        <div class="panel">
 
             <h2>
-                💧 Water
+                📊 City Risk Overview
             </h2>
 
+            <p>
+                All disaster types are continuously
+                evaluated. The highest-risk threat
+                is selected as the current priority.
+            </p>
+
+
             <div
-                id="waterStatus"
-                class="status">
+                id="riskOverview"
+                class="risk-overview"
+            >
 
-                Checking status...
-
-            </div>
-
-            <div
-                id="waterCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="waterChart"></canvas>
+                Loading...
 
             </div>
 
         </div>
 
 
-        <!-- ===================== -->
-        <!-- WASTE -->
-        <!-- ===================== -->
+        <!-- ===================================== -->
+        <!-- READINESS SCORE -->
+        <!-- ===================================== -->
 
-        <div class="card">
-
-            <h2>
-                🗑️ Waste
-            </h2>
-
-            <div
-                id="wasteStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="wasteCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="wasteChart"></canvas>
-
-            </div>
-
-        </div>
-
-
-        <!-- ===================== -->
-        <!-- ENVIRONMENT -->
-        <!-- ===================== -->
-
-        <div class="card">
+        <div class="panel score-section">
 
             <h2>
-                🌱 Environment
-            </h2>
-
-            <div
-                id="environmentStatus"
-                class="status">
-
-                Checking status...
-
-            </div>
-
-            <div
-                id="environmentCurrent"
-                class="current">
-
-                Current: --
-
-            </div>
-
-            <div class="chart-container">
-
-                <canvas id="environmentChart"></canvas>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- ========================= -->
-    <!-- SCORE + ALERT HISTORY -->
-    <!-- ========================= -->
-
-    <div class="bottom-section">
-
-
-        <!-- ===================== -->
-        <!-- OVERALL SCORE -->
-        <!-- ===================== -->
-
-        <div class="score-card">
-
-            <h2>
-                ⭐ Overall Smart City Score
+                ⭐ Disaster Readiness Score
             </h2>
 
 
-            <div class="score-circle">
-
-                <span id="overallScore">
-                    --
-                </span>
-
-                <small>
-                    / 100
-                </small>
-
+            <div id="overallScore">
+                --
             </div>
 
 
             <p id="scoreMessage">
-                Calculating city health...
+                Calculating...
             </p>
 
 
-            <div class="score-stats">
+            <p>
+                Normal:
+                <strong id="normalCount">
+                    0
+                </strong>
 
+                &nbsp;&nbsp;&nbsp;
 
-                <div class="score-stat">
-
-                    <span id="normalCount">
-                        0
-                    </span>
-
-                    <small>
-                        Normal
-                    </small>
-
-                </div>
-
-
-                <div class="score-stat">
-
-                    <span id="alertCount">
-                        0
-                    </span>
-
-                    <small>
-                        Alerts
-                    </small>
-
-                </div>
-
-
-            </div>
+                Risks:
+                <strong id="alertCount">
+                    0
+                </strong>
+            </p>
 
         </div>
 
 
-        <!-- ===================== -->
+        <!-- ===================================== -->
         <!-- ALERT HISTORY -->
-        <!-- ===================== -->
+        <!-- ===================================== -->
 
-        <div class="alert-card">
+        <div class="panel">
 
             <h2>
-                🚨 Alert History
+                🚨 Early-Warning Alerts
             </h2>
 
 
             <div id="alertHistory">
 
-                <p>
-                    Loading alerts...
-                </p>
+                Loading alerts...
 
             </div>
 
         </div>
 
+
     </div>
 
 
-    <!-- ========================= -->
-    <!-- JAVASCRIPT -->
-    <!-- ========================= -->
-
-    <script src="{{ url_for('static', filename='js/monitoring.js') }}">
-    </script>
+    <script
+        src="{{ url_for(
+            'static',
+            filename='js/monitoring.js'
+        ) }}"
+    ></script>
 
 
 </body>

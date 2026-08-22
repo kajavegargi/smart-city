@@ -1,227 +1,226 @@
-// ==========================================
-// SMART CITY MONITORING - FULL JAVASCRIPT
-// ==========================================
+// ============================================================
+// SMART CITY DISASTER MONITORING
+// ============================================================
 
 
-// Sensor types
-const types = [
-    "energy",
-    "water",
-    "waste",
-    "environment"
-];
+// ============================================================
+// DISASTER ICONS
+// ============================================================
+
+const disasterIcons = {
+
+    "Flood": "🌧️",
+
+    "Heatwave": "🌡️",
+
+    "Landslide": "🪨",
+
+    "Earthquake": "🌍"
+
+};
 
 
-// Store charts
-const charts = {};
+// ============================================================
+// UPDATE CURRENT PRIORITY DISASTER
+// ============================================================
 
-
-// ==========================================
-// CREATE CHARTS
-// ==========================================
-
-types.forEach(type => {
-
-    const ctx = document
-        .getElementById(type + "Chart")
-        .getContext("2d");
-
-
-    charts[type] = new Chart(ctx, {
-
-        type: "line",
-
-        data: {
-
-            labels: [],
-
-            datasets: [{
-                label:
-                    type.charAt(0).toUpperCase()
-                    + type.slice(1),
-
-                data: [],
-
-                borderWidth: 3,
-
-                tension: 0.4,
-
-                fill: false,
-
-                pointRadius: 4,
-
-                pointHoverRadius: 6
-            }]
-        },
-
-
-        options: {
-
-            responsive: true,
-
-            maintainAspectRatio: false,
-
-            animation: false,
-
-            scales: {
-
-                y: {
-
-                    beginAtZero: true
-
-                }
-
-            },
-
-            plugins: {
-
-                legend: {
-
-                    display: true
-
-                }
-
-            }
-
-        }
-
-    });
-
-});
-
-
-// ==========================================
-// UPDATE SENSOR DASHBOARD
-// ==========================================
-
-async function updateDashboard() {
+async function updateCurrentDisaster() {
 
     try {
 
         const response =
-            await fetch("/api/sensors");
+            await fetch(
+                "/api/current-disaster"
+            );
 
 
-        const readings =
+        const data =
             await response.json();
 
 
-        // If database has no readings
-        if (readings.length === 0) {
+        // ====================================================
+        // DISASTER
+        // ====================================================
 
-            return;
-
-        }
-
-
-        // Update every sensor type
-        types.forEach(type => {
-
-
-            // Get readings for this sensor
-            const sensorReadings =
-                readings
-                    .filter(sensor =>
-                        sensor.type === type
-                    )
-                    .slice(-10);
+        document.getElementById(
+            "disasterIcon"
+        ).textContent =
+            disasterIcons[
+                data.disaster
+            ] || "⚠️";
 
 
-            // If no readings for this type
-            if (sensorReadings.length === 0) {
-
-                return;
-
-            }
+        document.getElementById(
+            "disasterName"
+        ).textContent =
+            data.disaster;
 
 
-            // Latest reading
-            const latest =
-                sensorReadings[
-                    sensorReadings.length - 1
-                ];
+        // ====================================================
+        // RISK LEVEL
+        // ====================================================
+
+        const riskLevel =
+            document.getElementById(
+                "riskLevel"
+            );
 
 
-            // ==================================
-            // STATUS
-            // ==================================
-
-            const statusElement =
-                document.getElementById(
-                    type + "Status"
-                );
+        riskLevel.textContent =
+            data.level;
 
 
-            if (latest.status === "alert") {
+        riskLevel.className =
+            data.level.toLowerCase();
 
-                statusElement.innerHTML = `
-                    <span class="status-dot red"></span>
-                    ALERT
+
+        // ====================================================
+        // SCORE
+        // ====================================================
+
+        document.getElementById(
+            "riskScore"
+        ).textContent =
+            `Risk Score: ${data.score}/100`;
+
+
+        // ====================================================
+        // RECOMMENDATION
+        // ====================================================
+
+        document.getElementById(
+            "recommendation"
+        ).textContent =
+            "💡 " +
+            data.recommendation;
+
+
+        // ====================================================
+        // RESOURCES
+        // ====================================================
+
+        document.getElementById(
+            "ambulances"
+        ).textContent =
+            data.resources.ambulances;
+
+
+        document.getElementById(
+            "rescueTeams"
+        ).textContent =
+            data.resources.rescue_teams;
+
+
+        document.getElementById(
+            "shelters"
+        ).textContent =
+            data.resources.shelters;
+
+
+        document.getElementById(
+            "reliefSupplies"
+        ).textContent =
+            data.resources.relief_supplies;
+
+
+        // ====================================================
+        // RISK OVERVIEW
+        // ====================================================
+
+        const overview =
+            document.getElementById(
+                "riskOverview"
+            );
+
+
+        overview.innerHTML = "";
+
+
+        Object.entries(
+            data.all_risks
+        ).forEach(
+            ([disaster, score]) => {
+
+
+                let level;
+
+
+                if (score < 25) {
+
+                    level = "LOW";
+
+                }
+
+                else if (score < 50) {
+
+                    level = "MODERATE";
+
+                }
+
+                else if (score < 75) {
+
+                    level = "HIGH";
+
+                }
+
+                else {
+
+                    level = "CRITICAL";
+
+                }
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "risk-item";
+
+
+                item.innerHTML = `
+
+                    <div class="risk-item-name">
+
+                        ${disasterIcons[disaster] || "⚠️"}
+
+                        ${disaster}
+
+                    </div>
+
+                    <div class="
+                        risk-item-score
+                        ${level.toLowerCase()}
+                    ">
+
+                        ${score}/100
+
+                    </div>
+
+                    <div>
+
+                        ${level}
+
+                    </div>
+
                 `;
 
-            }
-            else {
 
-                statusElement.innerHTML = `
-                    <span class="status-dot green"></span>
-                    NORMAL
-                `;
-
-            }
-
-
-            // ==================================
-            // CURRENT VALUE
-            // ==================================
-
-            const currentElement =
-                document.getElementById(
-                    type + "Current"
+                overview.appendChild(
+                    item
                 );
 
-
-            currentElement.textContent =
-                `Current: ${latest.value} ${latest.unit}`;
-
-
-            // ==================================
-            // CHART
-            // ==================================
-
-            const chart =
-                charts[type];
-
-
-            // Time labels
-            chart.data.labels =
-                sensorReadings.map(sensor => {
-
-                    return sensor.timestamp
-                        .substring(11, 19);
-
-                });
-
-
-            // Sensor values
-            chart.data.datasets[0].data =
-                sensorReadings.map(sensor => {
-
-                    return sensor.value;
-
-                });
-
-
-            // Update chart
-            chart.update();
-
-        });
-
+            }
+        );
 
     }
+
     catch (error) {
 
         console.error(
-            "Error loading sensor data:",
+            "Error loading current disaster:",
             error
         );
 
@@ -230,43 +229,41 @@ async function updateDashboard() {
 }
 
 
-// ==========================================
-// UPDATE OVERALL SMART CITY SCORE
-// ==========================================
+// ============================================================
+// UPDATE READINESS SCORE
+// ============================================================
 
 async function updateScore() {
 
     try {
 
         const response =
-            await fetch("/api/score");
+            await fetch(
+                "/api/score"
+            );
 
 
         const data =
             await response.json();
 
 
-        // Display score
         document.getElementById(
             "overallScore"
-        ).textContent = data.score;
+        ).textContent =
+            data.score;
 
 
-        // Display normal count
         document.getElementById(
             "normalCount"
-        ).textContent = data.normal;
+        ).textContent =
+            data.normal;
 
 
-        // Display alert count
         document.getElementById(
             "alertCount"
-        ).textContent = data.alerts;
+        ).textContent =
+            data.alerts;
 
-
-        // ==================================
-        // SCORE MESSAGE
-        // ==================================
 
         const message =
             document.getElementById(
@@ -274,36 +271,40 @@ async function updateScore() {
             );
 
 
-        if (data.score === 100) {
+        if (data.score >= 80) {
 
             message.textContent =
-                "🌟 Excellent! All city systems are operating normally.";
+                "🌟 Excellent disaster readiness.";
 
         }
-        else if (data.score >= 75) {
+
+        else if (data.score >= 60) {
 
             message.textContent =
-                "👍 Good! Most city systems are operating normally.";
+                "👍 Good readiness. Continue monitoring.";
 
         }
-        else if (data.score >= 50) {
+
+        else if (data.score >= 40) {
 
             message.textContent =
-                "⚠️ Moderate! Some systems need attention.";
+                "⚠️ Moderate readiness. Preparedness actions recommended.";
 
         }
+
         else {
 
             message.textContent =
-                "🚨 Critical! Immediate attention required.";
+                "🚨 Critical situation. Immediate response recommended.";
 
         }
 
     }
+
     catch (error) {
 
         console.error(
-            "Error loading smart city score:",
+            "Error loading score:",
             error
         );
 
@@ -312,16 +313,18 @@ async function updateScore() {
 }
 
 
-// ==========================================
+// ============================================================
 // UPDATE ALERT HISTORY
-// ==========================================
+// ============================================================
 
 async function updateAlerts() {
 
     try {
 
         const response =
-            await fetch("/api/alerts");
+            await fetch(
+                "/api/alerts"
+            );
 
 
         const alerts =
@@ -334,11 +337,9 @@ async function updateAlerts() {
             );
 
 
-        // ==================================
-        // NO ALERTS
-        // ==================================
-
-        if (alerts.length === 0) {
+        if (
+            alerts.length === 0
+        ) {
 
             container.innerHTML = `
                 <p>
@@ -351,66 +352,75 @@ async function updateAlerts() {
         }
 
 
-        // Clear old alerts
         container.innerHTML = "";
 
 
-        // ==================================
-        // DISPLAY ALERTS
-        // ==================================
-
-        alerts.forEach(alert => {
+        alerts.forEach(
+            alert => {
 
 
-            const item =
-                document.createElement("div");
+                const item =
+                    document.createElement(
+                        "div"
+                    );
 
 
-            item.className =
-                "alert-item";
+                item.className =
+                    "alert-item";
 
 
-            // Convert timestamp
-            const time =
-                new Date(
-                    alert.timestamp
-                ).toLocaleString();
+                const time =
+                    new Date(
+                        alert.timestamp
+                    ).toLocaleString();
 
 
-            item.innerHTML = `
+                item.innerHTML = `
 
-                <div class="alert-icon">
-                    🚨
-                </div>
+                    <div>
 
-                <div class="alert-details">
+                        🚨
 
-                    <div class="alert-message">
-                        ${alert.message}
                     </div>
 
-                    <div class="alert-time">
-                        ${time}
+                    <div class="alert-details">
+
+                        <div class="alert-message">
+
+                            ${alert.message}
+
+                        </div>
+
+                        <div class="alert-time">
+
+                            ${time}
+
+                        </div>
+
                     </div>
 
-                </div>
+                    <strong>
 
-                <div class="alert-severity">
-                    ${alert.severity.toUpperCase()}
-                </div>
+                        ${alert.severity.toUpperCase()}
 
-            `;
+                    </strong>
+
+                `;
 
 
-            container.appendChild(item);
+                container.appendChild(
+                    item
+                );
 
-        });
+            }
+        );
 
     }
+
     catch (error) {
 
         console.error(
-            "Error loading alert history:",
+            "Error loading alerts:",
             error
         );
 
@@ -419,36 +429,36 @@ async function updateAlerts() {
 }
 
 
-// ==========================================
+// ============================================================
 // INITIAL LOAD
-// ==========================================
+// ============================================================
 
-updateDashboard();
+updateCurrentDisaster();
 
 updateScore();
 
 updateAlerts();
 
 
-// ==========================================
-// AUTOMATIC REFRESH
-// ==========================================
+// ============================================================
+// REFRESH DASHBOARD
+// ============================================================
 
-// Sensor charts + status
+// Dashboard checks the database every 3 seconds.
+// Actual sensor simulation changes every 30 seconds.
+
 setInterval(
-    updateDashboard,
+    updateCurrentDisaster,
     3000
 );
 
 
-// Overall score
 setInterval(
     updateScore,
     3000
 );
 
 
-// Alert history
 setInterval(
     updateAlerts,
     3000

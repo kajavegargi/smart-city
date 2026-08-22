@@ -4,10 +4,11 @@ DB_NAME = "smart_city.db"
 
 
 def init_db():
+
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
-    # Table for sensor readings
+    # Sensor readings
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS sensor_readings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,7 +20,7 @@ def init_db():
         )
     """)
 
-    # Table for alerts
+    # Alerts
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS alerts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
