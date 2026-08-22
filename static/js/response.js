@@ -69,7 +69,8 @@ function renderEventMarkers(events) {
         responseMap,
         e.location_lat,
         e.location_lng,
-        `<b>${e.type}</b><br>${e.description}`
+        `<b>${e.type}</b><br>${e.description}`,
+        e.type
       );
       markers.push(marker);
     });
@@ -95,7 +96,8 @@ function renderResourceMarkers(resources) {
       responseMap,
       r.location_lat,
       r.location_lng,
-      `<b>${r.name}</b><br>${status}`
+      `<b>${r.name}</b><br>${status}`,
+      r.type
     );
     resourceMarkers.push(marker);
   });

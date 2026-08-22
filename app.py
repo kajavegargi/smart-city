@@ -15,7 +15,7 @@ the same smart_city.db file that app.py reads from.
 from flask import Flask, render_template, jsonify
 from database import init_db, get_db
 from detect_routes import detect_bp
-from routing import get_current_routes, seed_resources_if_empty
+from routing import get_current_routes, resolve_expired_events, seed_resources_if_empty
 
 app = Flask(__name__)
 
@@ -112,6 +112,7 @@ def api_sensors():
 @app.route("/api/events")
 def api_events():
     """Latest disaster events, most recent first."""
+    resolve_expired_events()
     conn = get_db()
     rows = conn.execute(
         "SELECT * FROM events ORDER BY timestamp DESC LIMIT 20"
@@ -128,6 +129,7 @@ def api_route():
 
 @app.route("/api/resources")
 def api_resources():
+    resolve_expired_events()
     """All emergency resources and their current status/location."""
     conn = get_db()
     rows = conn.execute("SELECT * FROM resources ORDER BY id").fetchall()
@@ -137,6 +139,7 @@ def api_resources():
 
 @app.route("/api/simulate-event", methods=["POST"])
 def api_simulate_event():
+    resolve_expired_events() 
     """Manually fire a disaster event — powers the 'Simulate Event' button on response.html."""
     from data_simulator.event_sim import simulate_disaster_event
     event_id = simulate_disaster_event()

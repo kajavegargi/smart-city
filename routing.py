@@ -19,8 +19,35 @@ import sqlite3
 import heapq
 import math
 from database import get_db
+from datetime import datetime, timedelta
 
+EVENT_RESOLVE_SECONDS = 10  # events auto-resolve 60s after creation, freeing their resource
 DB_PATH = "smart_city.db"
+
+def resolve_expired_events():
+    """Mark events older than EVENT_RESOLVE_SECONDS as resolved, and release
+    whichever resource was dispatched to each one back to 'available'."""
+    conn = get_db()
+    cutoff = (datetime.now() - timedelta(seconds=EVENT_RESOLVE_SECONDS)).isoformat()
+
+    expired = conn.execute(
+        "SELECT id FROM events WHERE status = 'active' AND timestamp < ?",
+        (cutoff,)
+    ).fetchall()
+
+    for event in expired:
+        event_id = event["id"]
+        conn.execute(
+            "UPDATE events SET status = 'resolved' WHERE id = ?", (event_id,)
+        )
+        conn.execute(
+            "UPDATE resources SET status = 'available', assigned_event_id = NULL "
+            "WHERE assigned_event_id = ?",
+            (event_id,)
+        )
+
+    conn.commit()
+    conn.close()
 
 # Mock incident map — 8 nodes with coordinates (lat, lng), loosely spread
 # around a city center so rescue dispatch looks reasonable on the map.

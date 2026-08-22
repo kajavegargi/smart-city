@@ -5,8 +5,53 @@ function createMap(divId, center, zoom = 13) {
     }).addTo(map);
     return map;
 }
+
+const EMOJI_ICONS = {
+    ambulance: "🚑",
+    rescue_team: "🚒",
+    shelter: "🏠",
+    relief_supply: "📦",
+    flood: "🌊",
+    landslide: "⛰️",
+    earthquake: "🌐",
+    heatwave: "🌡️",
+};
+
+function emojiIcon(emoji) {
+    return L.divIcon({
+        html: `<div style="font-size:24px; line-height:24px;">${emoji}</div>`,
+        className: "emoji-marker",
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        popupAnchor: [0, -12],
+    });
+}
+
+function addMarker(map, lat, lng, popupText = "", type = null) {
+    const icon = type && EMOJI_ICONS[type] ? emojiIcon(EMOJI_ICONS[type]) : undefined;
+    const marker = icon
+        ? L.marker([lat, lng], { icon }).addTo(map)
+        : L.marker([lat, lng]).addTo(map);
+    if (popupText) marker.bindPopup(popupText);
+    return marker;
+}
+
+let currentRouteLine = null;
+
+function drawRoute(map, coordsArray) {
+    if (currentRouteLine) map.removeLayer(currentRouteLine);
+    currentRouteLine = L.polyline(coordsArray, { color: "blue" }).addTo(map);
+    map.fitBounds(currentRouteLine.getBounds());
+}
+
+const ROUTE_STYLES = {
+    flood: { color: "#4EE1C4", dashArray: null },
+    landslide: { color: "#FFB454", dashArray: "8,6" },
+    earthquake: { color: "#FF5C5C", dashArray: "2,6" },
+    heatwave: { color: "#FFD24E", dashArray: "12,4" },
+};
+
 function drawRoutes(map, routes) {
-    // clear any previously drawn routes
     if (window._routeLines) {
         window._routeLines.forEach((line) => map.removeLayer(line));
     }
@@ -14,7 +59,8 @@ function drawRoutes(map, routes) {
 
     routes.forEach((route) => {
         const latlngs = route.path.map((p) => [p.lat, p.lng]);
-        const line = L.polyline(latlngs, { color: "blue" }).addTo(map);
+        const style = ROUTE_STYLES[route.event_type] || { color: "blue", dashArray: null };
+        const line = L.polyline(latlngs, style).addTo(map);
         window._routeLines.push(line);
     });
 
@@ -22,16 +68,4 @@ function drawRoutes(map, routes) {
         const group = L.featureGroup(window._routeLines);
         map.fitBounds(group.getBounds());
     }
-}
-function addMarker(map, lat, lng, popupText = "") {
-    const marker = L.marker([lat, lng]).addTo(map);
-    if (popupText) marker.bindPopup(popupText);
-    return marker;
-}
-let currentRouteLine = null;
-
-function drawRoute(map, coordsArray) {
-    if (currentRouteLine) map.removeLayer(currentRouteLine);
-    currentRouteLine = L.polyline(coordsArray, { color: "blue" }).addTo(map);
-    map.fitBounds(currentRouteLine.getBounds());
 }
